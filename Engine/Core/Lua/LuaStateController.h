@@ -1,18 +1,26 @@
 #pragma once
 
 #include <lua.hpp>
+#include <LuaBridge/LuaBridge.h>
+#include <thread>
 #include <string>
+#include <vector>
+#include <functional>
+
+struct LuaState {
+    lua_State* state;
+    std::thread stateThread;
+};
 
 class LuaStateController{
 private:
-    lua_State* lua = luaL_newstate();
+    std::vector<LuaState*> states;
 public:
-    LuaStateController();
+    int createState(std::function<void(LuaState* state)> addFunctions, const std::string& directory);
+    lua_State* getLuaState(int stateID);
 
-    lua_State* getLuaState();
+    void doFile(int stateID, const std::string& name);
 
-    void doFile(const std::string& name);
-
-    int getGlobalInt(const std::string& name);
-    std::string getGlobalString(const std::string& name);
+    int getGlobalInt(int stateID, const std::string& name);
+    std::string getGlobalString(int stateID, const std::string& name);
 };

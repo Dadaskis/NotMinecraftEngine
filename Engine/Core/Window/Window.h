@@ -12,7 +12,8 @@ private:
 public:
     static Camera* currentCamera;
 
-    void createWindow(const std::string& windowTitle, int width, int height, std::function<void()> preMainLoopFunction, std::function<void()> mainLoopFunction);
+    void createWindow(const std::string& windowTitle, int width, int height);
+    void start();
     static void setCamera(Camera* camera);
     bool isKeyPressed(int keyID);
     void getSize(int* width, int* height);

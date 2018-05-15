@@ -56,7 +56,8 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
         std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
     }
     const char* vShaderCode = vertexCode.c_str();
-    const char * fShaderCode = fragmentCode.c_str();
+    const char* fShaderCode = fragmentCode.c_str();
+
     // 2. compile shaders
     unsigned int vertex, fragment;
     int success;
@@ -93,7 +94,6 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath, const char* geo
     glDeleteShader(fragment);
     if(geometryPath != nullptr)
         glDeleteShader(geometry);
-    std::cout << ID << std::endl;
 }
 
 void Shader::use() {

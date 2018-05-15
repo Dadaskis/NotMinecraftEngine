@@ -18,7 +18,7 @@ void mouseCallback(GLFWwindow* window, double xAngle, double yAngle){
     Window::currentCamera->processMouseMovement(xOffset, yOffset);
 }
 
-void Window::createWindow(const std::string& windowTitle, int width, int height, std::function<void()> preMainLoopFunction, std::function<void()> mainLoopFunction){
+void Window::createWindow(const std::string& windowTitle, int width, int height){
     const char* title = windowTitle.c_str();
 
     glfwInit();
@@ -49,13 +49,12 @@ void Window::createWindow(const std::string& windowTitle, int width, int height,
     glCullFace(GL_BACK);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
 
-    preMainLoopFunction();
+void Window::start(){
     while(!glfwWindowShouldClose(window)){
         glClearColor(0.15f, 0.4f, 0.7f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        mainLoopFunction();
 
         glfwSwapBuffers(window);
         glfwPollEvents();

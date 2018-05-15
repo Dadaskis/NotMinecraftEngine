@@ -1,4 +1,5 @@
 #include "ResourceManager.h"
+#include <iostream>
 
 ResourceManager::ResourceManager(){
     int cameraID = createCamera();
@@ -6,8 +7,8 @@ ResourceManager::ResourceManager(){
 }
 
 int ResourceManager::createShader(const std::string& vertexShader, const std::string& fragmentShader){
-    Shader shader(vertexShader.c_str(), fragmentShader.c_str());
-    shaders.push_back(shader);
+    shaders.push_back(Shader(vertexShader.c_str(), fragmentShader.c_str()));
+    std::cout << shaders.size() - 1 << std::endl;
     return shaders.size() - 1;
 }
 
@@ -64,33 +65,6 @@ BlockSystem* ResourceManager::getBlockSystem(int blockSystemID){
 bool ResourceManager::isBlockSystemIDRight(int blockSystemID){
     if(blockSystemID >= 0){
         if(blockSystemID < BSs.size()){
-            return true;
-        }
-    }
-    return false;
-}
-
-
-int ResourceManager::createThread(){
-    threads.push_back(std::thread());
-    return threads.size() - 1;
-}
-
-std::thread* ResourceManager::getThread(int threadID){
-    return &threads.at(threadID);
-}
-
-void ResourceManager::startThread(int threadID){
-    threads.at(threadID).detach();
-}
-
-void ResourceManager::setThreadFunction(int threadID, std::function<void()> function){
-    threads.at(threadID) = std::thread(function);
-}
-
-bool ResourceManager::isThreadIDRight(int threadID){
-    if(threadID >= 0){
-        if(threadID < threads.size()){
             return true;
         }
     }

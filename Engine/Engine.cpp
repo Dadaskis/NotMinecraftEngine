@@ -4,81 +4,19 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <thread>
+
 Core Engine::core;
 
-FastNoise Engine::noise(0);
-
-void Engine::preMainLoopFunction(){
-    core.lua.doFile("gamedata\\Types.lua");
-}
-
-void Engine::mainLoopFunction(){
-    core.lua.doFile("gamedata\\MainLoop.lua");
-}
-
 void Engine::start(){
-    luabridge::getGlobalNamespace(core.lua.getLuaState())
-        .beginNamespace("Engine")
-            .addFunction("createShader", createShader)
-            .addFunction("createBlockSystem", createBlockSystem)
-            .addFunction("addBlockInfo", addBlockInfo)
-            .addFunction("setBlockTexture", setBlockTexture)
-            .addFunction("setBlockSystemShader", setBlockSystemShader)
-            .addFunction("setCameraToBlockSystem", setCameraToBlockSystem)
-            .addFunction("drawBlocks", drawBlocks)
-            .addFunction("clearBlocksData", clearBlocksData)
-            .addFunction("loadTexture", loadTexture)
-            .addFunction("isPressed", isPressed)
-            .addFunction("handleCamera", handleCamera)
-            .addFunction("handleCurrentCamera", handleCurrentCamera)
-            .addFunction("getCameraPosition", getCameraPosition)
-            .addFunction("getCurrentCameraPosition", getCurrentCameraPosition)
-            .addFunction("getCameraFront", getCameraFront)
-            .addFunction("getCurrentCameraFront", getCurrentCameraFront)
-            .addFunction("getCameraSensitivity", getCameraSensitivity)
-            .addFunction("getCurrentCameraSensitivity", getCurrentCameraSensitivity)
-            .addFunction("getCameraSpeed", getCameraSpeed)
-            .addFunction("getCurrentCameraSpeed", getCurrentCameraSpeed)
-            .addFunction("getCameraFOV", getCameraFOV)
-            .addFunction("getCurrentCameraFOV", getCurrentCameraFOV)
-            .addFunction("getCameraRotation", getCameraRotation)
-            .addFunction("getCurrentCameraRotation", getCurrentCameraRotation)
-            .addFunction("setCameraRotation", setCameraRotation)
-            .addFunction("setCurrentCameraRotation", setCurrentCameraRotation)
-            .addFunction("setCameraSensitivity", setCameraSensitivity)
-            .addFunction("setCurrentCameraSensitivity", setCurrentCameraSensitivity)
-            .addFunction("setCameraFOV", setCameraFOV)
-            .addFunction("setCurrentCameraFOV", setCurrentCameraFOV)
-            .addFunction("setCameraRotation", setCameraRotation)
-            .addFunction("setCurrentCameraRotation", setCurrentCameraRotation)
-            .addFunction("setCameraSpeed", setCameraSpeed)
-            .addFunction("setCurrentCameraSpeed", setCurrentCameraSpeed)
-            .addFunction("setCameraPosition", setCameraPosition)
-            .addFunction("setCurrentCameraPosition", setCurrentCameraPosition)
-            .addFunction("setNoiseSeed", setNoiseSeed)
-            .addFunction("setNoiseType", setNoiseType)
-            .addFunction("setNoiseFrequency", setNoiseFrequency)
-            .addFunction("setCellurarDistanceFunction", setCellularDistanceFunction)
-            .addFunction("setCellularJitter", setCellularJitter)
-            .addFunction("setCellularReturnType", setCellularReturnType)
-            .addFunction("setFractalGain", setFractalGain)
-            .addFunction("setFractalLacunarity", setFractalLacunarity)
-            .addFunction("setFractalOctaves", setFractalOctaves)
-            .addFunction("setFractalType", setFractalType)
-            .addFunction("setInterp", setInterp)
-            .addFunction("getNoise", getNoise)
-            .addFunction("createThread", createThread)
-            .addFunction("startThread", startThread)
-            .addFunction("setThreadFunction", setThreadFunction)
-        .endNamespace();
-
-    core.lua.doFile("Config.lua");
-    std::string title = core.lua.getGlobalString("WINDOW_TITLE");
-    int width = core.lua.getGlobalInt("WINDOW_WIDTH"),
-        height = core.lua.getGlobalInt("WINDOW_HEIGHT");
+    //std::string title = core.lua.getGlobalString(mainState, "WINDOW_TITLE");
+    //int width = core.lua.getGlobalInt(mainState, "WINDOW_WIDTH"),
+    //    height = core.lua.getGlobalInt(mainState, "WINDOW_HEIGHT");
 
     core.window.setCamera(core.RM.getCurrentCamera());
-    core.window.createWindow(title, width, height, preMainLoopFunction, mainLoopFunction);
+    core.window.createWindow("NotMinecraftEngine", 800, 600);
+    int mainState = createLuaState("gamedata\\MainLuaState");
+    core.window.start();
 }
 
 
@@ -152,45 +90,70 @@ void Engine::handleCurrentCamera(int direction){
     core.RM.getCurrentCamera()->processKeyboard(direction);
 }
 
-luabridge::LuaRef Engine::getCameraPosition(int cameraID){
-    if(core.RM.isCameraIDRight(cameraID)){
-        glm::vec3 cameraPosition = core.RM.getCamera(cameraID)->getPosition();
-        luabridge::LuaRef returnPosition = luabridge::newTable(core.lua.getLuaState());
-        returnPosition["X"] = cameraPosition.x;
-        returnPosition["Y"] = cameraPosition.y;
-        returnPosition["Z"] = cameraPosition.z;
-        return returnPosition;
-    }
+float Engine::getCameraX(int cameraID){
+    return core.RM.getCamera(cameraID)->getPosition().x;
 }
 
-luabridge::LuaRef Engine::getCurrentCameraPosition(){
-    glm::vec3 cameraPosition = core.RM.getCurrentCamera()->getPosition();
-    luabridge::LuaRef returnPosition = luabridge::newTable(core.lua.getLuaState());
-    returnPosition["X"] = cameraPosition.x;
-    returnPosition["Y"] = cameraPosition.y;
-    returnPosition["Z"] = cameraPosition.z;
-    return returnPosition;
+float Engine::getCameraY(int cameraID){
+    return core.RM.getCamera(cameraID)->getPosition().y;
 }
 
-luabridge::LuaRef Engine::getCameraFront(int cameraID){
-    if(core.RM.isCameraIDRight(cameraID)){
-        glm::vec3 cameraFront = core.RM.getCamera(cameraID)->getFront();
-        luabridge::LuaRef returnFront = luabridge::newTable(core.lua.getLuaState());
-        returnFront["X"] = cameraFront.x;
-        returnFront["Y"] = cameraFront.y;
-        returnFront["Z"] = cameraFront.z;
-        return returnFront;
-    }
+float Engine::getCameraZ(int cameraID){
+    return core.RM.getCamera(cameraID)->getPosition().z;
 }
 
-luabridge::LuaRef Engine::getCurrentCameraFront(){
-    glm::vec3 cameraFront = core.RM.getCurrentCamera()->getFront();
-    luabridge::LuaRef returnFront = luabridge::newTable(core.lua.getLuaState());
-    returnFront["X"] = cameraFront.x;
-    returnFront["Y"] = cameraFront.y;
-    returnFront["Z"] = cameraFront.z;
-    return returnFront;
+float Engine::getCurrentCameraX(){
+    return core.RM.getCurrentCamera()->getPosition().x;
 }
+
+float Engine::getCurrentCameraY(){
+    return core.RM.getCurrentCamera()->getPosition().y;
+}
+
+float Engine::getCurrentCameraZ(){
+    return core.RM.getCurrentCamera()->getPosition().z;
+}
+
+float Engine::getCameraFrontX(int cameraID){
+    return core.RM.getCamera(cameraID)->getFront().x;
+}
+
+float Engine::getCameraFrontY(int cameraID){
+    return core.RM.getCamera(cameraID)->getFront().y;
+}
+
+float Engine::getCameraFrontZ(int cameraID){
+    return core.RM.getCamera(cameraID)->getFront().z;
+}
+
+float Engine::getCurrentCameraFrontX(){
+    return core.RM.getCurrentCamera()->getFront().x;
+}
+
+float Engine::getCurrentCameraFrontY(){
+    return core.RM.getCurrentCamera()->getFront().y;
+}
+
+float Engine::getCurrentCameraFrontZ(){
+    return core.RM.getCurrentCamera()->getFront().z;
+}
+
+float Engine::getCameraYaw(int cameraID){
+    return core.RM.getCamera(cameraID)->getRotation().x;
+}
+
+float Engine::getCameraPitch(int cameraID){
+    return core.RM.getCamera(cameraID)->getRotation().y;
+}
+
+float Engine::getCurrentCameraYaw(){
+    return core.RM.getCurrentCamera()->getRotation().x;
+}
+
+float Engine::getCurrentCameraPitch(){
+    return core.RM.getCurrentCamera()->getRotation().y;
+}
+
 
 float Engine::getCameraSensitivity(int cameraID){
     if(core.RM.isCameraIDRight(cameraID)){
@@ -217,27 +180,6 @@ float Engine::getCameraFOV(int cameraID){
 }
 float Engine::getCurrentCameraFOV(){
     return core.RM.getCurrentCamera()->getFOV();
-}
-
-luabridge::LuaRef Engine::getCameraRotation(int cameraID){
-    if(core.RM.isCameraIDRight(cameraID)){
-        glm::vec2 rotation = core.RM.getCamera(cameraID)->getRotation();
-        float yaw = rotation.x, // Z
-              pitch = rotation.y; // Y
-        luabridge::LuaRef luaRotate = luabridge::newTable(core.lua.getLuaState());
-        luaRotate["yaw"] = yaw;
-        luaRotate["pitch"] = pitch;
-        return luaRotate;
-    }
-}
-luabridge::LuaRef Engine::getCurrentCameraRotation(){
-    glm::vec2 rotation = core.RM.getCurrentCamera()->getRotation();
-    float yaw = rotation.x, // Z
-          pitch = rotation.y; // Y
-    luabridge::LuaRef luaRotate = luabridge::newTable(core.lua.getLuaState());
-    luaRotate["yaw"] = yaw;
-    luaRotate["pitch"] = pitch;
-    return luaRotate;
 }
 
 void Engine::setCameraPosition(int cameraID, float X, float Y, float Z){
@@ -281,66 +223,126 @@ void Engine::setCameraRotation(int cameraID, float yaw, float pitch){
         core.RM.getCamera(cameraID)->setRotation(yaw, pitch);
     }
 }
+
 void Engine::setCurrentCameraRotation(float yaw, float pitch){
     core.RM.getCurrentCamera()->setRotation(yaw, pitch);
 }
 
 void Engine::setNoiseSeed(int seed){
-    noise.SetSeed(seed);
+    core.noise.SetSeed(seed);
 }
 
 void Engine::setNoiseType(int type){
-    noise.SetNoiseType(static_cast<FastNoise::NoiseType>(type));
+    core.noise.SetNoiseType(static_cast<FastNoise::NoiseType>(type));
 }
 
 void Engine::setNoiseFrequency(float frequency){
-    noise.SetFrequency(frequency);
+    core.noise.SetFrequency(frequency);
 }
 
 void Engine::setCellularDistanceFunction(int function){
-    noise.SetCellularDistanceFunction(static_cast<FastNoise::CellularDistanceFunction>(function));
+    core.noise.SetCellularDistanceFunction(static_cast<FastNoise::CellularDistanceFunction>(function));
 }
 
 void Engine::setCellularJitter(float jitter){
-    noise.SetCellularJitter(jitter);
+    core.noise.SetCellularJitter(jitter);
 }
 
 void Engine::setCellularReturnType(int returnType){
-    noise.SetCellularReturnType(static_cast<FastNoise::CellularReturnType>(returnType));
+    core.noise.SetCellularReturnType(static_cast<FastNoise::CellularReturnType>(returnType));
 }
 
 void Engine::setFractalGain(float gain){
-    noise.SetFractalGain(gain);
+    core.noise.SetFractalGain(gain);
 }
 
 void Engine::setFractalLacunarity(float lacunarity){
-    noise.SetFractalLacunarity(lacunarity);
+    core.noise.SetFractalLacunarity(lacunarity);
 }
 
 void Engine::setFractalOctaves(int octaves){
-    noise.SetFractalOctaves(octaves);
+    core.noise.SetFractalOctaves(octaves);
 }
 
 void Engine::setFractalType(int type){
-    noise.SetFractalType(static_cast<FastNoise::FractalType>(type));
+    core.noise.SetFractalType(static_cast<FastNoise::FractalType>(type));
 }
 
 void Engine::setInterp(int interp){
-    noise.SetInterp(static_cast<FastNoise::Interp>(interp));
+    core.noise.SetInterp(static_cast<FastNoise::Interp>(interp));
 }
 
 float Engine::getNoise(int X, int Z){
-    return noise.GetNoise(X, Z);
+    return core.noise.GetNoise(X, Z);
 }
 
-int Engine::createThread(){
-    return core.RM.createThread();
+int Engine::createLuaState(const std::string& directory){
+    int stateID = core.lua.createState(addEngineFunctions, directory);
+
+    return stateID;
 }
 
-void Engine::startThread(int threadID){
-    core.RM.startThread(threadID);
-}
-
-void Engine::setThreadFunction(int threadID, luabridge::LuaRef function){
-    core.RM.setThreadFunction(threadID, [function](){function();});
+void Engine::addEngineFunctions(LuaState* luaState){
+    luabridge::getGlobalNamespace(luaState->state)
+        .beginNamespace("Engine")
+            .addFunction("createShader", createShader)
+            .addFunction("createBlockSystem", createBlockSystem)
+            .addFunction("addBlockInfo", addBlockInfo)
+            .addFunction("setBlockTexture", setBlockTexture)
+            .addFunction("setBlockSystemShader", setBlockSystemShader)
+            .addFunction("setCameraToBlockSystem", setCameraToBlockSystem)
+            .addFunction("drawBlocks", drawBlocks)
+            .addFunction("clearBlocksData", clearBlocksData)
+            .addFunction("loadTexture", loadTexture)
+            .addFunction("isPressed", isPressed)
+            .addFunction("handleCamera", handleCamera)
+            .addFunction("handleCurrentCamera", handleCurrentCamera)
+            .addFunction("getCameraX", getCameraX)
+            .addFunction("getCameraY", getCameraY)
+            .addFunction("getCameraZ", getCameraZ)
+            .addFunction("getCurrentCameraX", getCurrentCameraX)
+            .addFunction("getCurrentCameraY", getCurrentCameraY)
+            .addFunction("getCurrentCameraZ", getCurrentCameraZ)
+            .addFunction("getCameraFrontX", getCameraFrontX)
+            .addFunction("getCameraFrontY", getCameraFrontY)
+            .addFunction("getCameraFrontZ", getCameraFrontZ)
+            .addFunction("getCurrentCameraFrontX", getCurrentCameraFrontX)
+            .addFunction("getCurrentCameraFrontY", getCurrentCameraFrontY)
+            .addFunction("getCurrentCameraFrontZ", getCurrentCameraFrontZ)
+            .addFunction("getCameraSensitivity", getCameraSensitivity)
+            .addFunction("getCurrentCameraSensitivity", getCurrentCameraSensitivity)
+            .addFunction("getCameraSpeed", getCameraSpeed)
+            .addFunction("getCurrentCameraSpeed", getCurrentCameraSpeed)
+            .addFunction("getCameraFOV", getCameraFOV)
+            .addFunction("getCurrentCameraFOV", getCurrentCameraFOV)
+            .addFunction("getCameraYaw", getCameraYaw)
+            .addFunction("getCameraPitch", getCameraPitch)
+            .addFunction("getCurrentCameraYaw", getCurrentCameraYaw)
+            .addFunction("getCurrentCameraPitch", getCurrentCameraPitch)
+            .addFunction("setCameraRotation", setCameraRotation)
+            .addFunction("setCurrentCameraRotation", setCurrentCameraRotation)
+            .addFunction("setCameraSensitivity", setCameraSensitivity)
+            .addFunction("setCurrentCameraSensitivity", setCurrentCameraSensitivity)
+            .addFunction("setCameraFOV", setCameraFOV)
+            .addFunction("setCurrentCameraFOV", setCurrentCameraFOV)
+            .addFunction("setCameraRotation", setCameraRotation)
+            .addFunction("setCurrentCameraRotation", setCurrentCameraRotation)
+            .addFunction("setCameraSpeed", setCameraSpeed)
+            .addFunction("setCurrentCameraSpeed", setCurrentCameraSpeed)
+            .addFunction("setCameraPosition", setCameraPosition)
+            .addFunction("setCurrentCameraPosition", setCurrentCameraPosition)
+            .addFunction("setNoiseSeed", setNoiseSeed)
+            .addFunction("setNoiseType", setNoiseType)
+            .addFunction("setNoiseFrequency", setNoiseFrequency)
+            .addFunction("setCellurarDistanceFunction", setCellularDistanceFunction)
+            .addFunction("setCellularJitter", setCellularJitter)
+            .addFunction("setCellularReturnType", setCellularReturnType)
+            .addFunction("setFractalGain", setFractalGain)
+            .addFunction("setFractalLacunarity", setFractalLacunarity)
+            .addFunction("setFractalOctaves", setFractalOctaves)
+            .addFunction("setFractalType", setFractalType)
+            .addFunction("setInterp", setInterp)
+            .addFunction("getNoise", getNoise)
+            .addFunction("createLuaState", createLuaState)
+        .endNamespace();
 }

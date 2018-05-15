@@ -1,6 +1,5 @@
 #pragma once
 
-#include <thread>
 #include <vector>
 #include <string>
 
@@ -13,7 +12,6 @@ private:
     std::vector<Shader> shaders;
     std::vector<Camera> cameras;
     std::vector<BlockSystem> BSs;
-    std::vector<std::thread> threads;
     Camera* currentCamera;
 public:
     ResourceManager();
@@ -31,10 +29,4 @@ public:
     int createBlockSystem();
     BlockSystem* getBlockSystem(int blockSystemID);
     bool isBlockSystemIDRight(int blockSystemID);
-
-    int createThread();
-    std::thread* getThread(int threadID);
-    void startThread(int threadID);
-    void setThreadFunction(int threadID, std::function<void()> function);
-    bool isThreadIDRight(int threadID);
 };
