@@ -17,7 +17,7 @@ A voxel-based game engine inspired by Minecraft, built with C++, OpenGL, and Lua
 - State-specific script directories
 
 ### Procedural Generation
-- Integrated **FastNoise** library for多种 noise types:
+- Integrated **FastNoise** library for noise types:
   - Perlin, Simplex, Value, Cellular, Cubic
   - Fractal variants (FBM, Billow, RigidMulti)
   - Customizable frequency, octaves, lacunarity, and gain
