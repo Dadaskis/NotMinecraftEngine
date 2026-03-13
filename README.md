@@ -1,5 +1,7 @@
 # NotMinecraftEngine
 
+*I wrote this when I was 14...*
+
 A voxel-based game engine inspired by Minecraft, built with C++, OpenGL, and Lua scripting. This engine features a chunk-based terrain system with procedural generation, Lua-driven game logic, and a flexible resource management system.
 
 ## Features
